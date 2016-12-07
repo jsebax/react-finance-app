@@ -6,14 +6,25 @@ import CounterRoute from './Counter'
 /*  Note: Instead of using JSX, we recommend using react-router
     PlainRoute objects to build route definitions.   */
 
-export const createRoutes = (store) => ({
-  path        : '/',
-  component   : CoreLayout,
-  indexRoute  : Home,
-  childRoutes : [
-    CounterRoute(store)
-  ]
-})
+export const createRoutes = (store) => {
+  const routes = {
+    path: '/',
+    component: CoreLayout,
+    indexRoute: Home,
+    getChildRoutes (location, next) {
+      require.ensure([], (require) => {
+        next(null, [
+          // Provide store for async reducers and middleware
+          require('./Counter').default(store),
+          require('./Zen').default(store),
+          require('./NotFound').default
+        ])
+      })
+    }
+  }
+
+  return routes
+}
 
 /*  Note: childRoutes can be chunked or otherwise loaded programmatically
     using getChildRoutes with the following signature:
